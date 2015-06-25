@@ -7,21 +7,14 @@
 //
 
 #import "AppDelegate.h"
+#import "MainViewController.h"
 #import "JPEngine.h"
-#import "JPViewController.h"
-#import <objc/runtime.h>
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    
-    [JPEngine startEngine];
-    NSString *sourcePath = [[NSBundle mainBundle] pathForResource:@"demo" ofType:@"js"];
-    NSString *script = [NSString stringWithContentsOfFile:sourcePath encoding:NSUTF8StringEncoding error:nil];
-    [JPEngine evaluateScript:script];
-    
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-    JPViewController *rootViewController = [[JPViewController alloc] init];
+    MainViewController *rootViewController = [[MainViewController alloc] init];
     UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:rootViewController];
     self.window.rootViewController = navigationController;
     [self.window makeKeyAndVisible];

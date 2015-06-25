@@ -16,6 +16,7 @@
 		2D6D12FF1B0B8CF20095A435 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 2D6D12FC1B0B8CF20095A435 /* main.m */; };
 		2D6D13011B0B8CFF0095A435 /* demo.js in Resources */ = {isa = PBXBuildFile; fileRef = 2D6D13001B0B8CFF0095A435 /* demo.js */; };
 		2DD801281AF336BC005580A8 /* test.js in Resources */ = {isa = PBXBuildFile; fileRef = DE94AE451AF2480000E461D4 /* test.js */; };
+		62109E2B1B3BC1F30046558E /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 62109E2A1B3BC1F30046558E /* MainViewController.m */; };
 		DE94AE2B1AF246C000E461D4 /* JSPatchTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DE94AE2A1AF246C000E461D4 /* JSPatchTests.m */; };
 		DE94AE461AF2480000E461D4 /* JPTestObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DE94AE441AF2480000E461D4 /* JPTestObject.m */; };
 		DE94AE471AF2480000E461D4 /* test.js in Resources */ = {isa = PBXBuildFile; fileRef = DE94AE451AF2480000E461D4 /* test.js */; };
@@ -47,6 +48,8 @@
 		2D6D12FB1B0B8CF20095A435 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2D6D12FC1B0B8CF20095A435 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		2D6D13001B0B8CFF0095A435 /* demo.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = demo.js; sourceTree = "<group>"; };
+		62109E291B3BC1F30046558E /* MainViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
+		62109E2A1B3BC1F30046558E /* MainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
 		DE94AE0B1AF246BF00E461D4 /* JSPatchDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JSPatchDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DE94AE241AF246C000E461D4 /* JSPatchDemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JSPatchDemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DE94AE291AF246C000E461D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -88,6 +91,8 @@
 				2D5D89181B0B8BFF009382EC /* AppDelegate.m */,
 				2D5D891D1B0B8BFF009382EC /* JPViewController.h */,
 				2D5D891E1B0B8BFF009382EC /* JPViewController.m */,
+				62109E291B3BC1F30046558E /* MainViewController.h */,
+				62109E2A1B3BC1F30046558E /* MainViewController.m */,
 				2D6D13001B0B8CFF0095A435 /* demo.js */,
 			);
 			path = JSPatchDemo;
@@ -263,6 +268,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2D5D89211B0B8BFF009382EC /* AppDelegate.m in Sources */,
+				62109E2B1B3BC1F30046558E /* MainViewController.m in Sources */,
 				2D5D892D1B0B8C3B009382EC /* JPEngine.m in Sources */,
 				E1B89EA01B203482000645C2 /* JPMultithreadTestObject.m in Sources */,
 				2D5D89251B0B8BFF009382EC /* JPViewController.m in Sources */,

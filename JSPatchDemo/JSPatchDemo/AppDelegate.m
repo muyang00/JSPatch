@@ -9,6 +9,7 @@
 #import "AppDelegate.h"
 #import "MainViewController.h"
 #import "JPEngine.h"
+#import "JPViewController.h"
 
 @implementation AppDelegate
 

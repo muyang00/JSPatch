@@ -9,6 +9,9 @@
 #import <Foundation/Foundation.h>
 #import <JavaScriptCore/JavaScriptCore.h>
 
+void js_start(NSString* initScript);
+void js_end();
+
 @interface JPEngine : NSObject
 + (void)startEngine;
 + (JSValue *)evaluateScript:(NSString *)script;

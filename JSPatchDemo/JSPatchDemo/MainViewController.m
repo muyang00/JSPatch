@@ -23,11 +23,8 @@
 
 -(void) downloadFresh {
     dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-        [JPEngine startEngine];
         NSString *sourcePath = [[NSBundle mainBundle] pathForResource:@"demo" ofType:@"js"];
-        NSString *script = [NSString stringWithContentsOfFile:sourcePath encoding:NSUTF8StringEncoding error:nil];
-        [JPEngine evaluateScript:script];
-        sleep(1);
+        js_start(sourcePath);
         dispatch_async(dispatch_get_main_queue(), ^{
             NSLog(@"show new patch view");
             [self.tableView reloadData];
@@ -38,6 +35,7 @@
 
 -(void) closeFresh {
     dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+        js_end();
         dispatch_async(dispatch_get_main_queue(), ^{
             NSLog(@"clean patch and close");
             [self.tableView reloadData];
@@ -62,9 +60,9 @@
     return view;
 }
 
-//-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
-//    return 44.0f;
-//}
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 44.0f;
+}
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return 10;
@@ -74,13 +72,28 @@
     UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Cell"];
     cell.textLabel.text = [NSString stringWithFormat:@"%d", indexPath.row + 1];
     if(indexPath.row == 0){
-        //[self log];
+        [self log];
     }
     return cell;
 }
 
 -(void)log{
     NSLog(@">>>>>test patch call native method>>>>>>>");
+}
+
+
+-(id)forwardingTargetForSelector:(SEL)aSelector {
+    id cls = [super forwardingTargetForSelector:aSelector];
+    return cls;
+}
+
+-(NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector{
+    NSMethodSignature *ms = [super methodSignatureForSelector:aSelector];
+    return ms;
+}
+
+-(void)forwardInvocation:(NSInvocation *)anInvocation{
+    [super forwardInvocation:anInvocation];
 }
 
 @end

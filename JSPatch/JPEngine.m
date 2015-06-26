@@ -9,6 +9,8 @@
 #import <objc/runtime.h>
 #import <objc/message.h>
 
+IMP getEmptyMsgForwardIMP(char *typeDescription, NSMethodSignature *methodSignature);
+
 @interface JPBoxing : NSObject
 @property (nonatomic) id obj;
 @property (nonatomic) void *pointer;
@@ -547,34 +549,26 @@ static void overrideMethod(Class cls, NSString *selectorName, JSValue *function,
     }
     
     IMP originalImp = class_respondsToSelector(cls, selector) ? class_getMethodImplementation(cls, selector) : NULL;
-    
-    IMP msgForwardIMP = _objc_msgForward;
-    #if !defined(__arm64__)
-        if (typeDescription[0] == '{') {
-            //In some cases that returns struct, we should use the '_stret' API:
-            //http://sealiesoftware.com/blog/archive/2008/10/30/objc_explain_objc_msgSend_stret.html
-            //NSMethodSignature knows the detail but has no API to return, we can only get the info from debugDescription.
-            if ([methodSignature.debugDescription rangeOfString:@"is special struct return? YES"].location != NSNotFound) {
-                msgForwardIMP = (IMP)_objc_msgForward_stret;
-            }
-        }
-    #endif
-
+    IMP msgForwardIMP = getEmptyMsgForwardIMP(typeDescription, methodSignature);
     class_replaceMethod(cls, selector, msgForwardIMP, typeDescription);
+    
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wundeclared-selector"
-    SEL newForwardSelector = @selector(ORIGforwardInvocation:);
-    if (!class_respondsToSelector(cls, newForwardSelector)) {
+    if (class_getMethodImplementation(cls, @selector(forwardInvocation:)) != (IMP)JPForwardInvocation) {
         IMP originalForwardImp = class_replaceMethod(cls, @selector(forwardInvocation:), (IMP)JPForwardInvocation, "v@:@");
-        class_addMethod(cls, newForwardSelector, originalForwardImp, "v@:@");
+        class_addMethod(cls, @selector(ORIGforwardInvocation:), originalForwardImp, "v@:@");
     }
 #pragma clang diagnostic pop
 
     NSString *originalSelectorName = [NSString stringWithFormat:@"ORIG%@", selectorName];
     SEL originalSelector = NSSelectorFromString(originalSelectorName);
-    if(!class_respondsToSelector(cls, originalSelector) && class_respondsToSelector(cls, selector)) {
-        class_addMethod(cls, originalSelector, originalImp, typeDescription);
+    if(class_respondsToSelector(cls, selector)) {
+        if(!class_respondsToSelector(cls, originalSelector)){
+            class_addMethod(cls, originalSelector, originalImp, typeDescription);
+        } else {
+            class_replaceMethod(cls, originalSelector, originalImp, typeDescription);
+        }
     }
     
     NSString *JPSelectorName = [NSString stringWithFormat:@"_JP%@", selectorName];
@@ -585,7 +579,7 @@ static void overrideMethod(Class cls, NSString *selectorName, JSValue *function,
         _initJPOverideMethods(clsName);
         _JSOverideMethods[clsName][JPSelectorName] = function;
         const char *returnType = [methodSignature methodReturnType];
-        IMP JPImplementation;
+        IMP JPImplementation = NULL;
         
         switch (returnType[0]) {
             #define JP_OVERRIDE_RET_CASE(_type, _typeChar)   \
@@ -633,7 +627,12 @@ static void overrideMethod(Class cls, NSString *selectorName, JSValue *function,
                 break;
             }
         }
-        class_addMethod(cls, JPSelector, JPImplementation, typeDescription);
+        
+        if(!class_respondsToSelector(cls, JPSelector)){
+            class_addMethod(cls, JPSelector, JPImplementation, typeDescription);
+        } else {
+            class_replaceMethod(cls, JPSelector, JPImplementation, typeDescription);
+        }
     }
 }
 
@@ -1070,3 +1069,120 @@ static id unboxOCObjectToJS(id obj)
     return wrapObj(obj);
 }
 @end
+
+/**
+ * 开启JS脚本补丁
+ */
+void js_start(NSString* initScript){
+    [JPEngine startEngine];
+    
+    //执行patch脚本
+    NSString *script = [NSString stringWithContentsOfFile:initScript encoding:NSUTF8StringEncoding error:nil];
+    [JPEngine evaluateScript:script];
+}
+
+
+/**
+ * 关闭JS脚本补丁，回复原样
+ */
+void js_end(){
+    //处理保存的方法
+    if(_JSOverideMethods != nil && _JSOverideMethods.allKeys.count > 0){
+        //遍历所有的替换class
+        for(NSString *clsName in _JSOverideMethods.allKeys){
+            NSDictionary *methodsDic = _JSOverideMethods[clsName];
+            Class cls = NSClassFromString(clsName);
+            //遍历某个class中所有新增或者替换的methods
+            if(cls != nil && methodsDic != nil
+               && methodsDic.allKeys.count > 0){
+                BOOL isClsNew = NO;
+                for(NSString *JPSelectorName in methodsDic.allKeys){
+                    //处理替换方法,selector指回最初的IMP，JPSelector和ORIGSelector都指向未实现IMP
+                    if([JPSelectorName hasPrefix:@"_JP"]){
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
+                        if (class_getMethodImplementation(cls, @selector(forwardInvocation:)) == (IMP)JPForwardInvocation) {
+                            SEL ORIGforwardSelector = @selector(ORIGforwardInvocation:);
+                            IMP ORIGforwardImp = class_getMethodImplementation(cls, ORIGforwardSelector);
+                            class_replaceMethod(cls, @selector(forwardInvocation:), ORIGforwardImp, "v@:@");
+                            class_replaceMethod(cls, ORIGforwardSelector, _objc_msgForward, "v@:@");
+                        }
+#pragma clang diagnostic pop
+                        
+                        
+                        NSString *selectorName = [JPSelectorName stringByReplacingOccurrencesOfString:@"_JP" withString:@""];
+                        NSString *ORIGSelectorName = [JPSelectorName stringByReplacingOccurrencesOfString:@"_JP" withString:@"ORIG"];
+                        
+                        SEL JPSelector = NSSelectorFromString(JPSelectorName);
+                        SEL selector = NSSelectorFromString(selectorName);
+                        SEL ORIGSelector = NSSelectorFromString(ORIGSelectorName);
+                        
+                        if(class_respondsToSelector(cls, ORIGSelector) &&
+                           class_respondsToSelector(cls, selector) &&
+                           class_respondsToSelector(cls, JPSelector)){
+                            NSMethodSignature *methodSignature = [cls instanceMethodSignatureForSelector:ORIGSelector];
+                            Method method = class_getInstanceMethod(cls, ORIGSelector);
+                            char *typeDescription = (char *)method_getTypeEncoding(method);
+                            IMP forwardEmptyIMP = getEmptyMsgForwardIMP(typeDescription, methodSignature);
+                            IMP ORIGSelectorImp = class_getMethodImplementation(cls, ORIGSelector);
+                            
+                            class_replaceMethod(cls, selector, ORIGSelectorImp, typeDescription);
+                            class_replaceMethod(cls, JPSelector, forwardEmptyIMP, typeDescription);
+                            class_replaceMethod(cls, ORIGSelector, forwardEmptyIMP, typeDescription);
+                        }
+                    }
+                    
+                    //处理添加的新方法
+                    else {
+                        isClsNew = YES;
+                        SEL JPSelector = NSSelectorFromString(JPSelectorName);
+                        if(class_respondsToSelector(cls, JPSelector)){
+                            NSMethodSignature *methodSignature = [cls instanceMethodSignatureForSelector:JPSelector];
+                            Method method = class_getInstanceMethod(cls, JPSelector);
+                            char *typeDescription = (char *)method_getTypeEncoding(method);
+                            IMP forwardEmptyIMP = getEmptyMsgForwardIMP(typeDescription, methodSignature);
+                            
+                            class_replaceMethod(cls, JPSelector, forwardEmptyIMP, typeDescription);
+                        }
+                    }
+                }//for JPSelectorName
+                
+                //销毁新增的类
+                if(isClsNew){
+                    objc_disposeClassPair(cls);
+                }
+            }
+        }//for clsName
+    }
+    if(_cacheArguments != nil){
+        [_cacheArguments removeAllObjects];
+        _cacheArgumentsIdx = 0;
+    }
+    if(_JSOverideMethods != nil){
+        [_JSOverideMethods removeAllObjects];
+    }
+    
+    if(_propKeys != nil){
+        [_propKeys removeAllObjects];
+    }
+    
+    _context = nil;
+}
+
+
+IMP getEmptyMsgForwardIMP(char *typeDescription, NSMethodSignature *methodSignature){
+    IMP msgForwardIMP = _objc_msgForward;
+#if !defined(__arm64__)
+    if (typeDescription[0] == '{') {
+        //In some cases that returns struct, we should use the '_stret' API:
+        //http://sealiesoftware.com/blog/archive/2008/10/30/objc_explain_objc_msgSend_stret.html
+        //NSMethodSignature knows the detail but has no API to return, we can only get the info from debugDescription.
+        if ([methodSignature.debugDescription rangeOfString:@"is special struct return? YES"].location != NSNotFound) {
+            msgForwardIMP = (IMP)_objc_msgForward_stret;
+        }
+    }
+#endif
+    
+    return msgForwardIMP;
+}
+

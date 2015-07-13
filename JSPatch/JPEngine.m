@@ -1229,10 +1229,7 @@ void js_end(){
             }
         }//for clsName
     }
-    if(_cacheArguments != nil){
-        [_cacheArguments removeAllObjects];
-        _cacheArgumentsIdx = 0;
-    }
+    
     if(_JSOverideMethods != nil){
         [_JSOverideMethods removeAllObjects];
     }

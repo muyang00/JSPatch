@@ -3,7 +3,7 @@
 //  InstaScriptTests
 //
 //  Created by bang on 15/4/30.
-//  Copyright (c) 2015年 bang. All rights reserved.
+//  Copyright (c) 2015 bang. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
@@ -12,6 +12,9 @@
 #import "JPTestObject.h"
 #import "JPInheritanceTestObjects.h"
 #import "JPMultithreadTestObject.h"
+#import "JPInclude.h"
+#import "JPCoreGraphics.h"
+#import "JPUIKit.h"
 
 @interface JSPatchTests : XCTestCase
 
@@ -28,6 +31,7 @@
 - (void)setUp {
     [super setUp];
     [JPEngine startEngine];
+    [JPEngine addExtensions:@[[JPInclude instance], [JPCoreGraphics instance],[JPUIKit instance]]];
 }
 
 - (void)tearDown {
@@ -36,7 +40,7 @@
 
 - (void)testEngine {
     
-    NSString *testPath = [[NSBundle mainBundle] pathForResource:@"test" ofType:@"js"];
+    NSString *testPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"test" ofType:@"js"];
     NSString *jsTest = [[NSString alloc] initWithData:[[NSFileManager defaultManager] contentsAtPath:testPath] encoding:NSUTF8StringEncoding];
     [JPEngine evaluateScript:jsTest];
     
@@ -51,8 +55,11 @@
     
     XCTAssert(obj.funcWithIntPassed, @"funcWithIntPassed");
     XCTAssert(obj.funcWithNilPassed, @"funcWithNilPassed");
+    XCTAssert(obj.funcReturnNilPassed, @"funcReturnNilPassed");
     XCTAssert(obj.funcWithNilAndOthersPassed, @"funcWithNilAndOthersPassed");
     XCTAssert(obj.funcWithNullPassed, @"funcWithNullPassed");
+    XCTAssert(obj.funcTestBoolPassed, @"funcTestBoolPassed");
+    XCTAssert(obj.funcTestNSNumberPassed, @"funcTestNSNumberPassed");
     
     XCTAssert(obj.funcWithDictAndDoublePassed, @"funcWithDictAndDoublePassed");
     
@@ -72,10 +79,13 @@
     
     XCTAssert(obj.funcReturnBlockPassed, @"funcReturnBlockPassed");
     XCTAssert(obj.funcReturnObjectBlockPassed, @"funcReturnObjectBlockPassed");
+    XCTAssert(obj.funcReturnObjectBlockReturnValuePassed, @"funcReturnObjectBlockReturnValuePassed");
     XCTAssert(obj.callBlockWithStringAndIntPassed, @"callBlockWithStringAndIntPassed");
+    XCTAssert(obj.callBlockWithStringAndIntReturnValuePassed, @"callBlockWithStringAndIntReturnValuePassed");
     XCTAssert(obj.callBlockWithArrayAndViewPassed, @"callBlockWithArrayAndViewPassed");
     XCTAssert(obj.callBlockWithBoolAndBlockPassed, @"callBlockWithBoolAndBlockPassed");
     XCTAssert(obj.callBlockWithObjectAndBlockPassed, @"callBlockWithObjectAndBlockPassed");
+    XCTAssert(obj.callBlockWithObjectAndBlockReturnValuePassed, @"callBlockWithObjectAndBlockReturnValuePassed");
     
     XCTAssert(obj.funcToSwizzleWithStringViewIntPassed, @"funcToSwizzleWithStringViewIntPassed");
     XCTAssert(obj.funcToSwizzleViewPassed, @"funcToSwizzleViewPassed");
@@ -95,6 +105,7 @@
     XCTAssert(obj.funcTestCharPassed, @"funcTestCharPassed");
     XCTAssert(obj.funcToSwizzleTestPointerPassed, @"funcToSwizzleTestPointerPassed");
     XCTAssert(obj.funcTestPointerPassed, @"funcTestPointerPassed");
+    XCTAssert(obj.funcTestSizeofPassed,@"funcSizeofPassed");
 
     NSDictionary *originalDict = @{@"k": @"v"};
     NSDictionary *dict = [obj funcToSwizzleReturnDictionary:originalDict];
@@ -127,6 +138,9 @@
     XCTAssert(obj.mutableArrayPassed, @"mutableArrayPassed");
     XCTAssert(obj.mutableDictionaryPassed, @"mutableDictionaryPassed");
     XCTAssert(obj.mutableStringPassed, @"mutableStringPassed");
+    
+    XCTAssert(obj.funcWithTransformPassed, @"funcWithTransformPassed");
+    XCTAssert(obj.transformTranslatePassed, @"funcWithTransformPassed");
     
     XCTAssertEqualObjects(@"overrided",[subObj funcOverrideParentMethod]);
     
@@ -215,7 +229,7 @@
 dispatch_semaphore_t sem;
 int finishcount = 0;
 bool success = false;
-#define LOOPCOUNT 1
+#define LOOPCOUNT 100
 void thread(void* context);
 
 - (void)testDispatchQueue

@@ -3,7 +3,7 @@
 //  InstaScript
 //
 //  Created by bang on 15/4/30.
-//  Copyright (c) 2015年 bang. All rights reserved.
+//  Copyright (c) 2015 bang. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -18,8 +18,12 @@
 
 @property (nonatomic, assign) BOOL funcWithIntPassed;
 @property (nonatomic, assign) BOOL funcWithNilPassed;
+@property (nonatomic, assign) BOOL funcReturnNilPassed;
 @property (nonatomic, assign) BOOL funcWithNilAndOthersPassed;
 @property (nonatomic, assign) BOOL funcWithNullPassed;
+@property (nonatomic, assign) BOOL funcTestBoolPassed;
+@property (nonatomic, assign) BOOL funcTestNSNumberPassed;
+
 
 @property (nonatomic, assign) BOOL funcWithDictAndDoublePassed;
 
@@ -36,10 +40,13 @@
 
 @property (nonatomic, assign) BOOL funcReturnBlockPassed;
 @property (nonatomic, assign) BOOL funcReturnObjectBlockPassed;
+@property (nonatomic, assign) BOOL funcReturnObjectBlockReturnValuePassed;
 @property (nonatomic, assign) BOOL callBlockWithStringAndIntPassed;
+@property (nonatomic, assign) BOOL callBlockWithStringAndIntReturnValuePassed;
 @property (nonatomic, assign) BOOL callBlockWithArrayAndViewPassed;
 @property (nonatomic, assign) BOOL callBlockWithBoolAndBlockPassed;
 @property (nonatomic, assign) BOOL callBlockWithObjectAndBlockPassed;
+@property (nonatomic, assign) BOOL callBlockWithObjectAndBlockReturnValuePassed;
 
 
 @property (nonatomic, assign) BOOL funcToSwizzleWithStringViewIntPassed;
@@ -61,6 +68,7 @@
 @property (nonatomic, assign) BOOL funcTestCharPassed;
 @property (nonatomic, assign) BOOL funcToSwizzleTestPointerPassed;
 @property (nonatomic, assign) BOOL funcTestPointerPassed;
+@property (nonatomic, assign) BOOL funcTestSizeofPassed;
 @property (nonatomic, assign) BOOL classFuncToSwizzlePassed;
 @property (nonatomic, assign) BOOL classFuncToSwizzleReturnObjPassed;
 @property (nonatomic, assign) BOOL classFuncToSwizzleReturnObjCalledOriginalPassed;
@@ -81,6 +89,9 @@
 @property (nonatomic, assign) BOOL mutableArrayPassed;
 @property (nonatomic, assign) BOOL mutableStringPassed;
 @property (nonatomic, assign) BOOL mutableDictionaryPassed;
+
+@property (nonatomic, assign) BOOL funcWithTransformPassed;
+@property (nonatomic, assign) BOOL transformTranslatePassed;
 
 @property (nonatomic, assign) BOOL consoleLogPassed;
 @property (nonatomic, assign) BOOL overrideParentMethodPassed;

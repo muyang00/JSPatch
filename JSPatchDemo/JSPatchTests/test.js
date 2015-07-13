@@ -1,3 +1,4 @@
+include('protocolTest.js')
 var global = this;
 
 (function() {
@@ -98,8 +99,6 @@ var global = this;
 
   obj.funcTestChar(obj.funcReturnChar())
   var pointer = obj.funcReturnPointer()
-  obj.funcTestPointer(pointer)
-  free(pointer)
 
   ////////Base
   obj.funcReturnVoid();
@@ -108,9 +107,23 @@ var global = this;
 
   obj.funcWithInt(42);
   obj.funcWithDict_andDouble({test: "test"}, 4.2)
+ 
+  //////nil / NSNull
   obj.funcWithNil_dict_str_num(null, {k: "JSPatch"}, "JSPatch", 4.2)
-  obj.funcWithNil(null)
   obj.funcWithNull(nsnull)
+  var o = obj.funcReturnNil()
+  obj.funcWithNil(o)
+  obj.setFuncReturnNilPassed(!o)
+  o.callAnyMethod().willNotCrash()
+  
+  var bTrue = obj.funcTestBool(true)
+  var bFalse = obj.funcTestBool(false)
+  var bFalseNum = obj.funcTestBool(0)
+  obj.setFuncTestBoolPassed(bTrue && !bFalse && !bFalseNum)
+ 
+  var num0 = obj.funcTestNSNumber(0)
+  var num1 = obj.funcTestNSNumber(1)
+  obj.setFuncTestNSNumberPassed(num0 === 0 && num1 === 1)
 
   ///////UIView/NSObject
   var view = obj.funcReturnViewWithFrame({
@@ -197,13 +210,15 @@ var global = this;
     width: 100,
     height: 100
   }) 
-  blk({
+  var blkRet = blk({
     str: "stringFromJS",
     view: view
   }, view)
+  obj.setFuncReturnObjectBlockReturnValuePassed(blkRet == "succ")
 
   obj.callBlockWithStringAndInt(block("NSString *, int", function(str, num) {
     obj.setCallBlockWithStringAndIntPassed(str.toJS() == "stringFromOC" && num == 42)
+    return "succ"
   }))
 
   obj.callBlockWithArrayAndView(block("NSArray *, UIView *", function(arr, view) {
@@ -218,10 +233,11 @@ var global = this;
 
   obj.callBlockWithObjectAndBlock(block("UIView *, NSBlock *", function(view, blk) {
     var viewFrame = view.frame()
-    blk((viewFrame.width == 100 ? {
+    var ret = blk((viewFrame.width == 100 ? {
       "str": "stringFromJS",
       "view": view
     }: {}), view)
+    obj.setCallBlockWithObjectAndBlockReturnValuePassed(ret == "succ")
   }))
 
   //////super
@@ -277,21 +293,23 @@ var global = this;
   obj.setConsoleLogPassed(console.log != undefined)
 
 
-  //protocol
-  defineClass("JPTestProtocolObject : NSObject <JPTestProtocol, JPTestProtocol2>", {
-    protocolWithDouble_dict: function(num, dict) {
-      if (dict.objectForKey("name").toJS() == "JSPatch" && num - 4.2 < 0.001) {
-        return num
-      }
-      return 0
-    },
-    protocolWithInt: function(num) {
-      return num
-    }
-  }, {
-    classProtocolWithString_int: function(str, num) {
-      if (num == 42) return str
-      return null
-    }
-  })
+
+  //extension
+  var transform = obj.funcWithTransform({tx: 100, ty: 100, a: 1, b: 0, c: 0, d: 1})
+  obj.setFuncWithTransformPassed(transform.tx == 100 && transform.ty == 100 && transform.a == 1)
+  var translated = CGAffineTransformTranslate(transform, 10, 10);
+  obj.setTransformTranslatePassed(translated.tx == 110 && translated.ty == 110)
+ 
+  require('JPEngine').addExtensions([require('JPMemory').instance()])
+  obj.funcTestPointer(pointer)
+  free(pointer)
+ 
+  //sizeof
+  var rectSize       = sizeof("CGRect")
+  var pointSize      = sizeof("CGPoint")
+  var sizeSize       = sizeof("CGSize")
+  var vectorSize     = sizeof("CGVector")
+  var edgeInsetsSize = sizeof("UIEdgeInsets")
+  var transformSize  = sizeof("CGAffineTransform")
+  obj.setFuncTestSizeofPassed(rectSize > 0 && pointSize > 0 && sizeSize > 0 && vectorSize > 0 && edgeInsetsSize > 0 && transformSize > 0)
 })();

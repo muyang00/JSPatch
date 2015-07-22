@@ -36,5 +36,6 @@ void js_end();
 - (id)formatPointerOCToJS:(void *)pointer;
 - (id)formatJSToOC:(JSValue *)val;
 - (id)formatOCToJS:(id)obj;
+- (void *)getPointerFromJS:(JSValue *)val;
 @end
 

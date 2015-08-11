@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <JavaScriptCore/JavaScriptCore.h>
 @class JPExtension;
+extern NSMutableArray *registeredStructExtensions;
 
 void js_start(NSString* initScript);
 void js_end();
@@ -36,6 +37,5 @@ void js_end();
 - (id)formatPointerOCToJS:(void *)pointer;
 - (id)formatJSToOC:(JSValue *)val;
 - (id)formatOCToJS:(id)obj;
-- (void *)getPointerFromJS:(JSValue *)val;
 @end
 

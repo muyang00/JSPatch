@@ -637,9 +637,20 @@ static void overrideMethod(Class cls, NSString *selectorName, JSValue *function,
     }
     
     IMP originalImp = class_respondsToSelector(cls, selector) ? class_getMethodImplementation(cls, selector) : NULL;
-    IMP msgForwardIMP = getEmptyMsgForwardIMP(typeDescription, methodSignature);
+
+    IMP msgForwardIMP = _objc_msgForward;
+#if !defined(__arm64__)
+    if (typeDescription[0] == '{') {
+        //In some cases that returns struct, we should use the '_stret' API:
+        //http://sealiesoftware.com/blog/archive/2008/10/30/objc_explain_objc_msgSend_stret.html
+        //NSMethodSignature knows the detail but has no API to return, we can only get the info from debugDescription.
+        if ([methodSignature.debugDescription rangeOfString:@"is special struct return? YES"].location != NSNotFound) {
+            msgForwardIMP = (IMP)_objc_msgForward_stret;
+        }
+    }
+#endif
+
     class_replaceMethod(cls, selector, msgForwardIMP, typeDescription);
-    
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wundeclared-selector"
@@ -649,9 +660,9 @@ static void overrideMethod(Class cls, NSString *selectorName, JSValue *function,
     }
 #pragma clang diagnostic pop
 
-    NSString *originalSelectorName = [NSString stringWithFormat:@"ORIG%@", selectorName];
-    SEL originalSelector = NSSelectorFromString(originalSelectorName);
     if(class_respondsToSelector(cls, selector)) {
+        NSString *originalSelectorName = [NSString stringWithFormat:@"ORIG%@", selectorName];
+        SEL originalSelector = NSSelectorFromString(originalSelectorName);
         if(!class_respondsToSelector(cls, originalSelector)){
             class_addMethod(cls, originalSelector, originalImp, typeDescription);
         } else {
@@ -666,59 +677,10 @@ static void overrideMethod(Class cls, NSString *selectorName, JSValue *function,
     if (!_JSOverideMethods[clsName][JPSelectorName]) {
         _initJPOverideMethods(clsName);
         _JSOverideMethods[clsName][JPSelectorName] = function;
-        const char *returnType = [methodSignature methodReturnType];
-        IMP JPImplementation = NULL;
-        
-        switch (returnType[0]) {
-            #define JP_OVERRIDE_RET_CASE(_type, _typeChar)   \
-            case _typeChar : { \
-                JPImplementation = (IMP)JPMETHOD_IMPLEMENTATION_NAME(_type); \
-                break;  \
-            }
-            JP_OVERRIDE_RET_CASE(v, 'v')
-            JP_OVERRIDE_RET_CASE(id, '@')
-            JP_OVERRIDE_RET_CASE(c, 'c')
-            JP_OVERRIDE_RET_CASE(C, 'C')
-            JP_OVERRIDE_RET_CASE(s, 's')
-            JP_OVERRIDE_RET_CASE(S, 'S')
-            JP_OVERRIDE_RET_CASE(i, 'i')
-            JP_OVERRIDE_RET_CASE(I, 'I')
-            JP_OVERRIDE_RET_CASE(l, 'l')
-            JP_OVERRIDE_RET_CASE(L, 'L')
-            JP_OVERRIDE_RET_CASE(q, 'q')
-            JP_OVERRIDE_RET_CASE(Q, 'Q')
-            JP_OVERRIDE_RET_CASE(f, 'f')
-            JP_OVERRIDE_RET_CASE(d, 'd')
-            JP_OVERRIDE_RET_CASE(B, 'B')
-            JP_OVERRIDE_RET_CASE(pointer, '^')
-            JP_OVERRIDE_RET_CASE(pointer, '*')
-            JP_OVERRIDE_RET_CASE(cls, '#')
-            JP_OVERRIDE_RET_CASE(sel, ':')
-            
-            case '{': {
-                NSString *typeString = extractTypeName([NSString stringWithUTF8String:returnType]);
-                #define JP_OVERRIDE_RET_STRUCT(_type, _funcSuffix) \
-                if ([typeString rangeOfString:@#_type].location != NSNotFound) {    \
-                    JPImplementation = (IMP)JPMETHOD_IMPLEMENTATION_NAME(_funcSuffix); \
-                    break;  \
-                }
-                JP_OVERRIDE_RET_STRUCT(CGRect, rect)
-                JP_OVERRIDE_RET_STRUCT(CGPoint, point)
-                JP_OVERRIDE_RET_STRUCT(CGSize, size)
-                JP_OVERRIDE_RET_STRUCT(NSRange, range)
-                
-                break;
-            }
-            default: {
-                JPImplementation = (IMP)JPMETHOD_IMPLEMENTATION_NAME(v);
-                break;
-            }
-        }
-        
         if(!class_respondsToSelector(cls, JPSelector)){
-            class_addMethod(cls, JPSelector, JPImplementation, typeDescription);
+            class_addMethod(cls, JPSelector, msgForwardIMP, typeDescription);
         } else {
-            class_replaceMethod(cls, JPSelector, JPImplementation, typeDescription);
+            class_replaceMethod(cls, JPSelector, msgForwardIMP, typeDescription);
         }
     }
 }

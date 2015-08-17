@@ -25,19 +25,8 @@
 		DE94AE2B1AF246C000E461D4 /* JSPatchTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DE94AE2A1AF246C000E461D4 /* JSPatchTests.m */; };
 		DE94AE461AF2480000E461D4 /* JPTestObject.m in Sources */ = {isa = PBXBuildFile; fileRef = DE94AE441AF2480000E461D4 /* JPTestObject.m */; };
 		DE94AE471AF2480000E461D4 /* test.js in Resources */ = {isa = PBXBuildFile; fileRef = DE94AE451AF2480000E461D4 /* test.js */; };
-		DEE3D29D1B7CC11700D73DF1 /* JPStructPointer.m in Sources */ = {isa = PBXBuildFile; fileRef = DEE3D29C1B7CC11700D73DF1 /* JPStructPointer.m */; };
-		DEE3D2B01B7CC5D200D73DF1 /* JPCGBitmapContext.m in Sources */ = {isa = PBXBuildFile; fileRef = DEE3D2A01B7CC5D200D73DF1 /* JPCGBitmapContext.m */; };
-		DEE3D2B11B7CC5D200D73DF1 /* JPCGColor.m in Sources */ = {isa = PBXBuildFile; fileRef = DEE3D2A21B7CC5D200D73DF1 /* JPCGColor.m */; };
-		DEE3D2B21B7CC5D200D73DF1 /* JPCGContext.m in Sources */ = {isa = PBXBuildFile; fileRef = DEE3D2A41B7CC5D200D73DF1 /* JPCGContext.m */; };
 		DEE3D2B31B7CC5D200D73DF1 /* JPCGGeometry.m in Sources */ = {isa = PBXBuildFile; fileRef = DEE3D2A61B7CC5D200D73DF1 /* JPCGGeometry.m */; };
-		DEE3D2B41B7CC5D200D73DF1 /* JPCGImage.m in Sources */ = {isa = PBXBuildFile; fileRef = DEE3D2A81B7CC5D200D73DF1 /* JPCGImage.m */; };
-		DEE3D2B51B7CC5D200D73DF1 /* JPCGPath.m in Sources */ = {isa = PBXBuildFile; fileRef = DEE3D2AA1B7CC5D200D73DF1 /* JPCGPath.m */; };
-		DEE3D2B61B7CC5D200D73DF1 /* JPCGTransform.m in Sources */ = {isa = PBXBuildFile; fileRef = DEE3D2AC1B7CC5D200D73DF1 /* JPCGTransform.m */; };
-		DEE3D2B71B7CC5D200D73DF1 /* JPCoreGraphics.m in Sources */ = {isa = PBXBuildFile; fileRef = DEE3D2AE1B7CC5D200D73DF1 /* JPCoreGraphics.m */; };
 		DEE3D2C21B7CD1DC00D73DF1 /* JPUIGeometry.m in Sources */ = {isa = PBXBuildFile; fileRef = DEE3D2BA1B7CD1DC00D73DF1 /* JPUIGeometry.m */; };
-		DEE3D2C31B7CD1DC00D73DF1 /* JPUIGraphics.m in Sources */ = {isa = PBXBuildFile; fileRef = DEE3D2BC1B7CD1DC00D73DF1 /* JPUIGraphics.m */; };
-		DEE3D2C41B7CD1DC00D73DF1 /* JPUIImage.m in Sources */ = {isa = PBXBuildFile; fileRef = DEE3D2BE1B7CD1DC00D73DF1 /* JPUIImage.m */; };
-		DEE3D2C51B7CD1DC00D73DF1 /* JPUIKit.m in Sources */ = {isa = PBXBuildFile; fileRef = DEE3D2C01B7CD1DC00D73DF1 /* JPUIKit.m */; };
 		E1B89EA01B203482000645C2 /* JPMultithreadTestObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E1B89E9F1B203482000645C2 /* JPMultithreadTestObject.m */; };
 		E1B89EA31B218986000645C2 /* JPInheritanceTestObjects.m in Sources */ = {isa = PBXBuildFile; fileRef = E1B89EA21B218986000645C2 /* JPInheritanceTestObjects.m */; };
 		E1B89EAE1B228818000645C2 /* multithreadTest.js in Resources */ = {isa = PBXBuildFile; fileRef = E1B89EAD1B228818000645C2 /* multithreadTest.js */; };
@@ -384,22 +373,11 @@
 				DEE3D2B31B7CC5D200D73DF1 /* JPCGGeometry.m in Sources */,
 				DEE3D2C21B7CD1DC00D73DF1 /* JPUIGeometry.m in Sources */,
 				DE6FFEED1B4243500005EE83 /* JPInclude.m in Sources */,
-				DEE3D2C51B7CD1DC00D73DF1 /* JPUIKit.m in Sources */,
 				2D5D892D1B0B8C3B009382EC /* JPEngine.m in Sources */,
 				E1B89EA01B203482000645C2 /* JPMultithreadTestObject.m in Sources */,
-				DEE3D29D1B7CC11700D73DF1 /* JPStructPointer.m in Sources */,
-				DEE3D2B11B7CC5D200D73DF1 /* JPCGColor.m in Sources */,
-				DEE3D2C31B7CD1DC00D73DF1 /* JPUIGraphics.m in Sources */,
 				2D5D89251B0B8BFF009382EC /* JPViewController.m in Sources */,
-				DEE3D2B51B7CC5D200D73DF1 /* JPCGPath.m in Sources */,
-				DEE3D2B61B7CC5D200D73DF1 /* JPCGTransform.m in Sources */,
-				DEE3D2B01B7CC5D200D73DF1 /* JPCGBitmapContext.m in Sources */,
-				DEE3D2B21B7CC5D200D73DF1 /* JPCGContext.m in Sources */,
 				3F6C38EB1B4A37D600F88662 /* JPMemory.m in Sources */,
-				DEE3D2B41B7CC5D200D73DF1 /* JPCGImage.m in Sources */,
 				2D6D12FF1B0B8CF20095A435 /* main.m in Sources */,
-				DEE3D2B71B7CC5D200D73DF1 /* JPCoreGraphics.m in Sources */,
-				DEE3D2C41B7CD1DC00D73DF1 /* JPUIImage.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

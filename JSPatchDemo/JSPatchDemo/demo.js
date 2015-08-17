@@ -14,7 +14,10 @@ defineClass('MainViewController:UITableViewController', {
       		cell = require('UITableViewCell').alloc().initWithStyle_reuseIdentifier(3, "cell")
     	}
         cell.textLabel().setTextColor(require('UIColor').redColor());
-    	cell.textLabel().setText("hello"+indexPath.row())
+        var show0 = "+p0:" + self.valueForKey('_stringVar').toJS();
+        var show1 = "+p1:" + self.publicPropery1().toJS();
+        var show2 = "+p2:" + self.privateProperty1().toJS();
+    	cell.textLabel().setText("hello"+indexPath.row()+show0+show2+show1)
     	return cell
   	},
  

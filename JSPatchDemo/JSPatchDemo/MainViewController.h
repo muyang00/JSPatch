@@ -8,6 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
-@interface MainViewController : UITableViewController
+@interface MainViewController : UITableViewController{
+
+}
+@property(nonatomic, readwrite) NSString *publicPropery1;
+
 
 @end

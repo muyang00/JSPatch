@@ -9,13 +9,28 @@
 #import "MainViewController.h"
 #import "JPEngine.h"
 
-@interface MainViewController ()
+@interface MainViewController (){
+    //添加成员变量测试
+    NSDictionary *_dictionaryVar;
+    NSArray *_arrayVar;
+    NSString *_stringVar;
+    NSInteger _integerVar;
+    int _intVar;
+    BOOL _boolVar;
+    float _floatVar;
+    double _doubleVar;
+}
+@property (nonatomic, readwrite) NSString *privateProperty1;
 
 @end
 
 @implementation MainViewController
 
 -(void) viewDidLoad {
+    _arrayVar = @[@"var_array"];
+    _stringVar = @"strVar";
+    self.publicPropery1 = @"pub1";
+    self.privateProperty1 = @"pri1";
     self.navigationItem.title = @"hello patch";
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"清除补丁刷新" style:UIBarButtonItemStyleBordered target:self action:@selector(closeFresh)];
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"下载补丁刷新" style:UIBarButtonItemStyleBordered target:self action:@selector(downloadFresh)];
@@ -70,7 +85,8 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Cell"];
-    cell.textLabel.text = [NSString stringWithFormat:@"%d", indexPath.row + 1];
+    NSString *show0 = [self valueForKey:@"_stringVar"];
+    cell.textLabel.text = [NSString stringWithFormat:@"%d+%@", indexPath.row + 1, show0];
     if(indexPath.row == 0){
         [self log];
     }

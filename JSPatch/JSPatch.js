@@ -17,7 +17,7 @@ var global = this
     if (obj === undefined || obj === null) return false
     if (typeof obj == "object") {
       if (obj.__obj) return obj
-      if (obj.__isNull) return false
+      if (obj.__isNil) return false
     }
     if (obj instanceof Array) {
       var ret = []
@@ -145,6 +145,15 @@ var global = this
       return cb.apply(slf, _formatOCToJS(args))
     }
     return {args: args, cb: callback}
+  }
+
+  global.defineStruct = function() {
+    var args = Array.prototype.slice.call(arguments)
+    require('JPEngine').defineStruct({
+      'name': args[0],
+      'types': args[1],
+      'keys': args.slice(2)
+    })
   }
   
   global.console = {

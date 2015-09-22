@@ -672,16 +672,13 @@ static void overrideMethod(Class cls, NSString *selectorName, JSValue *function,
     
     NSString *JPSelectorName = [NSString stringWithFormat:@"_JP%@", selectorName];
     SEL JPSelector = NSSelectorFromString(JPSelectorName);
-    NSString *clsName = NSStringFromClass(cls);
 
-    if (!_JSOverideMethods[clsName][JPSelectorName]) {
-        _initJPOverideMethods(clsName);
-        _JSOverideMethods[clsName][JPSelectorName] = function;
-        if(!class_respondsToSelector(cls, JPSelector)){
-            class_addMethod(cls, JPSelector, msgForwardIMP, typeDescription);
-        } else {
-            class_replaceMethod(cls, JPSelector, msgForwardIMP, typeDescription);
-        }
+    _initJPOverideMethods(cls);
+    _JSOverideMethods[cls][JPSelectorName] = function;
+    if(!class_respondsToSelector(cls, JPSelector)){
+        class_addMethod(cls, JPSelector, msgForwardIMP, typeDescription);
+    } else {
+        class_replaceMethod(cls, JPSelector, msgForwardIMP, typeDescription);
     }
 }
 
@@ -1298,9 +1295,8 @@ void js_end(){
     //处理保存的方法
     if(_JSOverideMethods != nil && _JSOverideMethods.allKeys.count > 0){
         //遍历所有的替换class
-        for(NSString *clsName in _JSOverideMethods.allKeys){
-            NSDictionary *methodsDic = _JSOverideMethods[clsName];
-            Class cls = NSClassFromString(clsName);
+        for(Class cls in _JSOverideMethods.allKeys){
+            NSDictionary *methodsDic = _JSOverideMethods[cls];
             //遍历某个class中所有新增或者替换的methods
             if(cls != nil && methodsDic != nil
                && methodsDic.allKeys.count > 0){

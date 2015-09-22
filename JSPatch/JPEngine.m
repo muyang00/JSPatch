@@ -10,6 +10,7 @@
 #import <objc/message.h>
 #import <UIKit/UIApplication.h>
 
+IMP getEmptyMsgForwardIMP(char *typeDescription, NSMethodSignature *methodSignature);
 @interface JPBoxing : NSObject
 @property (nonatomic) id obj;
 @property (nonatomic) void *pointer;
@@ -1382,12 +1383,13 @@ IMP getEmptyMsgForwardIMP(char *typeDescription, NSMethodSignature *methodSignat
         //In some cases that returns struct, we should use the '_stret' API:
         //http://sealiesoftware.com/blog/archive/2008/10/30/objc_explain_objc_msgSend_stret.html
         //NSMethodSignature knows the detail but has no API to return, we can only get the info from debugDescription.
+        NSMethodSignature *methodSignature = [NSMethodSignature signatureWithObjCTypes:typeDescription];
         if ([methodSignature.debugDescription rangeOfString:@"is special struct return? YES"].location != NSNotFound) {
             msgForwardIMP = (IMP)_objc_msgForward_stret;
         }
     }
 #endif
-    
+
     return msgForwardIMP;
 }
 

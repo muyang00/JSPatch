@@ -50,21 +50,23 @@ var global = this
     return obj
   }
   
-  var _methodFunc = function(instance, clsName, methodName, args, isSuper) {
-    methodName = methodName.replace(/__/g, "-")
-    var selectorName = methodName.replace(/_/g, ":").replace(/-/g, "_")
-    var marchArr = selectorName.match(/:/g)
-    var numOfArgs = marchArr ? marchArr.length : 0
-    if (args.length > numOfArgs) {
-      selectorName += ":"
+  var _methodFunc = function(instance, clsName, methodName, args, isSuper, isPerformSelector) {
+    var selectorName = methodName
+    if (!isPerformSelector) {
+      methodName = methodName.replace(/__/g, "-")
+      selectorName = methodName.replace(/_/g, ":").replace(/-/g, "_")
+      var marchArr = selectorName.match(/:/g)
+      var numOfArgs = marchArr ? marchArr.length : 0
+      if (args.length > numOfArgs) {
+        selectorName += ":"
+      }
     }
     var ret = instance ? _OC_callI(instance, selectorName, args, isSuper):
                          _OC_callC(clsName, selectorName, args)
-
     return _formatOCToJS(ret)
   }
 
-  Object.prototype.__c = function(methodName) {
+  Object.defineProperty(Object.prototype, "__c", {value: function(methodName) {
     if (this instanceof Boolean) {
       return function() {
         return false
@@ -81,11 +83,18 @@ var global = this
         return {__obj: self.__obj, __clsName: self.__clsName, __isSuper: 1}
       }
     }
+
+    if (methodName == 'performSelector') {
+      return function(){
+        var args = Array.prototype.slice.call(arguments)
+        return _methodFunc(self.__obj, self.__clsName, args[0], args.splice(1), self.__isSuper, true)
+      }
+    }
     return function(){
       var args = Array.prototype.slice.call(arguments)
       return _methodFunc(self.__obj, self.__clsName, methodName, args, self.__isSuper)
     }
-  }
+  }, configurable:false, enumerable: false})
 
   var _require = function(clsName) {
     if (!global[clsName]) {
@@ -112,12 +121,15 @@ var global = this
         newMethods[methodName] = [originMethod.length, function() {
           var args = _formatOCToJS(Array.prototype.slice.call(arguments))
           var lastSelf = global.self
-          
-          global.self = args[0]
-          args.splice(0,1)
-          var ret = originMethod.apply(originMethod, args)
-          global.self = lastSelf
-          
+          var ret;
+          try {
+            global.self = args[0]
+            args.splice(0,1)
+            ret = originMethod.apply(originMethod, args)
+            global.self = lastSelf
+          } catch(e) {
+            _OC_catch(e.message, e.stack)
+          }
           return ret
         }]
       })()
@@ -146,18 +158,19 @@ var global = this
     }
     return {args: args, cb: callback}
   }
-
-  global.defineStruct = function() {
-    var args = Array.prototype.slice.call(arguments)
-    require('JPEngine').defineStruct({
-      'name': args[0],
-      'types': args[1],
-      'keys': args.slice(2)
-    })
-  }
   
-  global.console = {
-    log: global._OC_log
+  if (global.console) {
+    var jsLogger = console.log;
+    global.console.log = function() {
+      global._OC_log.apply(global, arguments);
+      if (jsLogger) {
+        jsLogger.apply(global.console, arguments);
+      }
+    }
+  } else {
+    global.console = {
+      log: global._OC_log
+    }
   }
   
   global.YES = 1
